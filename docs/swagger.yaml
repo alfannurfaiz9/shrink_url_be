@@ -1,0 +1,15 @@
+basePath: /
+host: localhost:9000
+info:
+  contact: {}
+  description: API docs for ShrinkURL
+  title: ShrinkURL Backend
+  version: "1.0"
+paths: {}
+securityDefinitions:
+  BearerToken:
+    description: Bearer Token used as identity for accessing backend
+    in: header
+    name: Authorization
+    type: apiKey
+swagger: "2.0"
