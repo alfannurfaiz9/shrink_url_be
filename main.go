@@ -33,23 +33,40 @@ func main() {
 		os.Getenv("DBPASSWORD"),
 		os.Getenv("DBHOST"),
 		os.Getenv("DBPORT"),
-		os.Getenv("DBNAME"))
+		os.Getenv("DBNAME"),
+	)
 
-	pool, err := dbConfig.Connect()
-	if err != nil {
-		log.Fatalf("Cannot connect to database... \n%s", err)
+	pool, dbErr := dbConfig.Connect()
+	if dbErr != nil {
+		log.Fatalf("Cannot connect to database... \n%s", dbErr)
 		return
 	}
-
 	defer pool.Close()
 
-	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
-	if err := pool.Ping(ctx); err != nil {
+	dbCtx, dbCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	if err := pool.Ping(dbCtx); err != nil {
 		log.Fatalf("Database is not ready... \n%s", err)
 	}
-	defer cancel()
+	defer dbCancel()
+	log.Println("Successfully connect to database...")
 
-	log.Println("Successfully connect to database")
+	rdbConf := config.NewRdb(
+		os.Getenv("REDIS_USER"),
+		os.Getenv("REDIS_PASS"),
+		os.Getenv("REDIS_HOST"),
+		os.Getenv("REDIS_PORT"),
+	)
+
+	rdCtx, rdCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	rdb := rdbConf.Connect()
+	defer rdb.Close()
+
+	_, rdErr := rdb.Ping(rdCtx).Result()
+	if rdErr != nil {
+		log.Fatalf("Redis is not ready... \n%s", rdErr)
+	}
+	defer rdCancel()
+	log.Println("Successfully connect to redis...")
 
 	r := gin.Default()
 	router.InitMainRouter(r, pool)
