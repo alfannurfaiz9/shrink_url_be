@@ -39,17 +39,19 @@ func (a *AuthController) Register(ctx *gin.Context) {
 	var body dto.Register
 	if err := ctx.ShouldBindBodyWith(&body, binding.JSON); err != nil {
 		log.Println(err.Error())
-		err := utils.ValidatorError(err)
-		if err != "" {
+		errMsg := utils.ValidatorError(err)
+		if errMsg != "" {
 			ctx.JSON(http.StatusBadRequest, dto.ErrorResponse{
 				Success: false,
-				Message: err,
+				Code:    "VALIDATION_ERROR",
+				Message: errMsg,
 			})
 			return
 		}
 
 		ctx.JSON(http.StatusBadRequest, dto.ErrorResponse{
 			Success: false,
+			Code:    "INVALID_PAYLOAD",
 			Message: "invalid payload format",
 		})
 		return
@@ -60,6 +62,7 @@ func (a *AuthController) Register(ctx *gin.Context) {
 		if errors.Is(err, app_error.EmailAlreadyExist) {
 			ctx.JSON(http.StatusConflict, dto.ErrorResponse{
 				Success: false,
+				Code:    "EMAIL_ALREADY_EXIST",
 				Message: err.Error(),
 			})
 			return
@@ -67,6 +70,7 @@ func (a *AuthController) Register(ctx *gin.Context) {
 
 		ctx.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
+			Code:    "INTERNAL_SERVER_ERROR",
 			Message: "internal server error",
 		})
 		return
@@ -74,6 +78,6 @@ func (a *AuthController) Register(ctx *gin.Context) {
 
 	ctx.JSON(http.StatusCreated, dto.Response{
 		Success: true,
-		Message: "account succefully created",
+		Message: "account successfully created",
 	})
 }

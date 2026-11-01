@@ -8,5 +8,6 @@ type Response struct {
 
 type ErrorResponse struct {
 	Success bool   `json:"success" example:"false"`
+	Code    string `json:"code" example:"EMAIL_ALREADY_EXISTS"`
 	Message string `json:"message" example:"internal server error"`
 }
