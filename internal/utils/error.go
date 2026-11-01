@@ -7,9 +7,8 @@ import (
 	"github.com/go-playground/validator/v10"
 )
 
-func ValidatorError(err error) map[string]string {
+func ValidatorError(err error) string {
 	var ve validator.ValidationErrors
-	errorMessages := make(map[string]string)
 
 	if errors.As(err, &ve) {
 		for _, v := range ve {
@@ -17,18 +16,18 @@ func ValidatorError(err error) map[string]string {
 
 			switch v.Tag() {
 			case "required":
-				errorMessages[field] = fmt.Sprintf("%s is required", field)
+				return fmt.Sprintf("%s is required", field)
 			case "email":
-				errorMessages[field] = "invalid email format"
+				return "invalid email format"
 			case "min":
-				errorMessages[field] = fmt.Sprintf("%s must be at least %s characters", field, v.Param())
+				return fmt.Sprintf("%s must be at least %s characters", field, v.Param())
 			case "max":
-				errorMessages[field] = fmt.Sprintf("%s must be at most %s characters", field, v.Param())
+				return fmt.Sprintf("%s must be at most %s characters", field, v.Param())
 			default:
-				errorMessages[field] = fmt.Sprintf("%s is invalid", field)
+				return fmt.Sprintf("%s is invalid", field)
 			}
 		}
 	}
 
-	return errorMessages
+	return ""
 }

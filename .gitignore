@@ -2,4 +2,4 @@ tmp
 .air.toml
 .env*
 redis.conf
-test.sql
+test
