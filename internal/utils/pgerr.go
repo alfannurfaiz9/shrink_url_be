@@ -1,0 +1,16 @@
+package utils
+
+import (
+	"errors"
+
+	"github.com/jackc/pgx/v5/pgconn"
+)
+
+func IsUniqueViolation(err error) bool {
+	var pgErr *pgconn.PgError
+	if errors.As(err, &pgErr) {
+		return pgErr.Code == "2305"
+	}
+
+	return false
+}
