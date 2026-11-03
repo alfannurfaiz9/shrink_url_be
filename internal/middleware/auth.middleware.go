@@ -19,7 +19,7 @@ func AuthMiddleware(rdb *redis.Client) gin.HandlerFunc {
 		if bearer == "" {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, dto.ErrorResponse{
 				Success: false,
-				Code:    "AUTHORIZATION_ERROR",
+				Code:    "UNAUTHORIZED",
 				Message: "please login first",
 			})
 			return
@@ -29,6 +29,7 @@ func AuthMiddleware(rdb *redis.Client) gin.HandlerFunc {
 		if len(result) != 2 || result[0] != "Bearer" {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, dto.ErrorResponse{
 				Success: false,
+				Code:    "UNAUTHORIZED",
 				Message: "invalid bearer token",
 			})
 			return
@@ -41,12 +42,14 @@ func AuthMiddleware(rdb *redis.Client) gin.HandlerFunc {
 			if errors.Is(err, jwt.ErrTokenExpired) || errors.Is(err, jwt.ErrTokenInvalidIssuer) {
 				ctx.AbortWithStatusJSON(http.StatusUnauthorized, dto.ErrorResponse{
 					Success: false,
+					Code:    "UNAUTHORIZED",
 					Message: "invalid token",
 				})
 				return
 			}
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, dto.ErrorResponse{
 				Success: false,
+				Code:    "UNAUTHORIZED",
 				Message: "internal server error",
 			})
 			return
@@ -57,6 +60,7 @@ func AuthMiddleware(rdb *redis.Client) gin.HandlerFunc {
 		if err == nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, dto.ErrorResponse{
 				Success: false,
+				Code:    "UNAUTHORIZED",
 				Message: "please login first",
 			})
 			return
