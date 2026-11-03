@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/alfannurfaiz9/shrink_url_be/internal/dto"
+	"github.com/alfannurfaiz9/shrink_url_be/internal/utils"
 	"github.com/alfannurfaiz9/shrink_url_be/pkg"
 	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v5"
@@ -56,7 +57,7 @@ func AuthMiddleware(rdb *redis.Client) gin.HandlerFunc {
 		}
 
 		key := fmt.Sprintf("shortlink:token:%s", result[1])
-		_, err = rdb.Get(ctx, key).Result()
+		_, err = utils.GetRedisStr(ctx, rdb, key)
 		if err == nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, dto.ErrorResponse{
 				Success: false,
