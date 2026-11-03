@@ -24,7 +24,7 @@ func NewAuthService(ar *repo.AuthRepo) *AuthService {
 	}
 }
 
-func (a *AuthService) Register(ctx context.Context, body dto.Register) error {
+func (a *AuthService) Register(ctx context.Context, body dto.RegisterRequest) error {
 	exist, err := a.ar.IsUserExist(ctx, body.Email)
 	if err != nil {
 		return app_error.ErrConnectDatabase

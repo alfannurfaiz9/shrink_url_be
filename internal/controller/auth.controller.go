@@ -36,7 +36,7 @@ func NewAuthController(as *service.AuthService) *AuthController {
 // @Failure 409 {object} dto.ErrorResponse
 // @Failure 500 {object} dto.ErrorResponse
 func (a *AuthController) Register(ctx *gin.Context) {
-	var body dto.Register
+	var body dto.RegisterRequest
 	if err := ctx.ShouldBindBodyWith(&body, binding.JSON); err != nil {
 		log.Println(err.Error())
 		errMsg := utils.ValidatorError(err)
