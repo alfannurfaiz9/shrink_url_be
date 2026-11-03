@@ -49,7 +49,7 @@ func AuthMiddleware(rdb *redis.Client) gin.HandlerFunc {
 			}
 			ctx.AbortWithStatusJSON(http.StatusInternalServerError, dto.ErrorResponse{
 				Success: false,
-				Code:    "UNAUTHORIZED",
+				Code:    "INTERNAL_SERVER_ERROR",
 				Message: "internal server error",
 			})
 			return
