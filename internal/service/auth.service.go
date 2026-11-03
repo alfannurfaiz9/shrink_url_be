@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/alfannurfaiz9/shrink_url_be/internal/dto"
@@ -10,6 +11,7 @@ import (
 	"github.com/alfannurfaiz9/shrink_url_be/internal/repo"
 	"github.com/alfannurfaiz9/shrink_url_be/internal/utils"
 	"github.com/alfannurfaiz9/shrink_url_be/pkg"
+	"github.com/jackc/pgx/v5"
 )
 
 type AuthService struct {
@@ -48,4 +50,26 @@ func (a *AuthService) Register(ctx context.Context, body dto.Register) error {
 	}
 
 	return nil
+}
+
+func (a *AuthService) Login(ctx context.Context, body dto.LoginRequest) (dto.LoginResponse, error) {
+	user, err := a.ar.FindUserByEmail(ctx, body.Email)
+	if err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return dto.LoginResponse{}, app_error.InvalidEmailOrPassword
+		}
+		return dto.LoginResponse{}, err
+	}
+
+	if err := pkg.CompareHash(body.Password, user.PasswordHash); err != nil {
+		return dto.LoginResponse{}, app_error.InvalidEmailOrPassword
+	}
+
+	claims := pkg.NewJWTClaims(user.Id)
+	token, err := claims.GenerateToken()
+	if err != nil {
+		return dto.LoginResponse{}, err
+	}
+
+	return dto.LoginResponse{Token: token}, nil
 }
