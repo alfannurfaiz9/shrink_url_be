@@ -8,6 +8,10 @@ import (
 	"github.com/redis/go-redis/v9"
 )
 
+func GetRedisStr(ctx context.Context, rdb *redis.Client, key string) (string, error) {
+	return rdb.Get(ctx, key).Result()
+}
+
 func GetRedisJson[T any](ctx context.Context, rdb *redis.Client, key string) (T, error) {
 	var data T
 	str, err := rdb.Get(ctx, key).Result()
