@@ -49,3 +49,23 @@ func (j *JWTClaims) VerifyToken(token string) error {
 	}
 	return nil
 }
+
+func (j *JWTClaims) DecodeToken(token string) error {
+	jwtToken, err := jwt.ParseWithClaims(token, j, func(t *jwt.Token) (any, error) {
+		return []byte(os.Getenv("JWT_KEY")), nil
+	})
+	if err != nil {
+		return err
+	}
+	if !jwtToken.Valid {
+		return jwt.ErrTokenExpired
+	}
+	iss, err := jwtToken.Claims.GetIssuer()
+	if err != nil {
+		return err
+	}
+	if iss != os.Getenv("JWT_ISSUER") {
+		return jwt.ErrTokenInvalidIssuer
+	}
+	return nil
+}
