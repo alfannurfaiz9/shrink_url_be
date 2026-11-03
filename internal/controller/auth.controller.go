@@ -29,7 +29,7 @@ func NewAuthController(as *service.AuthService) *AuthController {
 // @Tags Auth
 // @Accept json
 // @Produce json
-// @Param request body dto.Register true "Register Payload"
+// @Param request body dto.RegisterRequest true "Register Payload"
 // @Router /auth/register [post]
 // @Success 201 {object} dto.Response
 // @Failure 400 {object} dto.ErrorResponse
