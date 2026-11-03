@@ -9,3 +9,8 @@ type User struct {
 	PasswordHash string    `db:"password_hash"`
 	CreatedAt    time.Time `db:"created_at"`
 }
+
+type UserProfile struct {
+	User
+	ActiveLink int `db:"active_link"`
+}

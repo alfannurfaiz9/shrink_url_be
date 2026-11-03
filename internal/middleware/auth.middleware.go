@@ -26,7 +26,7 @@ func AuthMiddleware(rdb *redis.Client) gin.HandlerFunc {
 			return
 		}
 
-		result := strings.Split(bearer, "")
+		result := strings.Split(bearer, " ")
 		if len(result) != 2 || result[0] != "Bearer" {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, dto.ErrorResponse{
 				Success: false,

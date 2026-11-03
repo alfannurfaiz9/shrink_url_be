@@ -69,7 +69,7 @@ func main() {
 	log.Println("Successfully connect to redis...")
 
 	r := gin.Default()
-	router.InitMainRouter(r, pool)
+	router.InitMainRouter(r, pool, rdb)
 
 	r.Run(fmt.Sprintf("%s:%s", os.Getenv("HOST"), os.Getenv("PORT")))
 }
