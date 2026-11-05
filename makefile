@@ -25,3 +25,7 @@ dc-down:
 dc-reset:
 	make down
 	make up
+
+run:
+	swag init
+	air
