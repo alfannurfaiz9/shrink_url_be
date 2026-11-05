@@ -214,6 +214,44 @@ const docTemplate = `{
                 }
             }
         },
+        "/links/{slug}": {
+            "get": {
+                "description": "Fetches the original URL based on the provided slug and redirects the client to it.",
+                "tags": [
+                    "Link"
+                ],
+                "summary": "Redirect to Original URL",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "Unique Link Slug",
+                        "name": "slug",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "302": {
+                        "description": "Successfully redirected to the original URL",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "404": {
+                        "description": "Link not found",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    }
+                }
+            }
+        },
         "/users/profile": {
             "get": {
                 "security": [

@@ -160,3 +160,37 @@ func (l *LinkController) GetUserLink(ctx *gin.Context) {
 		Message: "successfully get user links",
 	})
 }
+
+// GetOriginalUrl
+// @Summary      Redirect to Original URL
+// @Description  Fetches the original URL based on the provided slug and redirects the client to it.
+// @Tags         Link
+// @Param        slug   path      string  true  "Unique Link Slug"
+// @Router       /links/{slug}	[get]
+// @Success      302    {string}  string  "Successfully redirected to the original URL"
+// @Failure      404    {object}  dto.ErrorResponse  "Link not found"
+// @Failure      500    {object}  dto.ErrorResponse  "Internal server error"
+func (l *LinkController) GetOriginalUrl(ctx *gin.Context) {
+	slug := ctx.Param("slug")
+
+	res, err := l.ls.GetOriginalUrl(ctx.Request.Context(), slug)
+	if err != nil {
+		log.Println(err.Error())
+		if errors.Is(err, app_error.LinkNotFound) {
+			ctx.JSON(http.StatusNotFound, dto.ErrorResponse{
+				Success: false,
+				Code:    "LINK_NOT_FOUND",
+				Message: "link not found",
+			})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Code:    "INTERNAL_SERVER_ERROR",
+			Message: "internal server error",
+		})
+		return
+	}
+
+	ctx.Redirect(http.StatusFound, res)
+}

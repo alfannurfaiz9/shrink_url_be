@@ -202,6 +202,32 @@ paths:
       summary: Create a new link
       tags:
       - Links
+  /links/{slug}:
+    get:
+      description: Fetches the original URL based on the provided slug and redirects
+        the client to it.
+      parameters:
+      - description: Unique Link Slug
+        in: path
+        name: slug
+        required: true
+        type: string
+      responses:
+        "302":
+          description: Successfully redirected to the original URL
+          schema:
+            type: string
+        "404":
+          description: Link not found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal server error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      summary: Redirect to Original URL
+      tags:
+      - Link
   /users/profile:
     get:
       consumes:

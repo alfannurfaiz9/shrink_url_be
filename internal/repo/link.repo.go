@@ -2,8 +2,11 @@ package repo
 
 import (
 	"context"
+	"errors"
 
+	app_error "github.com/alfannurfaiz9/shrink_url_be/internal/error"
 	"github.com/alfannurfaiz9/shrink_url_be/internal/model"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -81,4 +84,24 @@ func (l *LinkRepo) GetUserLink(ctx context.Context, userId int) ([]model.Link, e
 	}
 
 	return links, nil
+}
+
+func (l *LinkRepo) GetOriginalUrl(ctx context.Context, slug string) (string, error) {
+	sql := `
+	SELECT original_url
+	FROM links
+	WHERE slug = $1
+	AND deleted_at IS NULL`
+
+	var originalUrl string
+	if err := l.db.QueryRow(ctx, sql, slug).Scan(
+		&originalUrl,
+	); err != nil {
+		if errors.Is(err, pgx.ErrNoRows) {
+			return "", app_error.LinkNotFound
+		}
+		return "", err
+	}
+
+	return originalUrl, nil
 }

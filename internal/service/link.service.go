@@ -2,6 +2,7 @@ package service
 
 import (
 	"context"
+	"errors"
 	"net/url"
 	"regexp"
 
@@ -72,4 +73,16 @@ func (l *LinkService) GetUserLink(ctx context.Context, userId int) ([]dto.Link, 
 	}
 
 	return links, nil
+}
+
+func (l *LinkService) GetOriginalUrl(ctx context.Context, slug string) (string, error) {
+	res, err := l.lr.GetOriginalUrl(ctx, slug)
+	if err != nil {
+		if errors.Is(err, app_error.LinkNotFound) {
+			return "", app_error.LinkNotFound
+		}
+		return "", err
+	}
+
+	return res, nil
 }
