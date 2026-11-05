@@ -1,5 +1,16 @@
 basePath: /
 definitions:
+  dto.CreateLinkRequest:
+    properties:
+      original_url:
+        type: string
+      slug:
+        maxLength: 50
+        minLength: 3
+        type: string
+    required:
+    - original_url
+    type: object
   dto.ErrorResponse:
     properties:
       code:
@@ -129,6 +140,43 @@ paths:
       summary: Register a new user
       tags:
       - Auth
+  /links:
+    post:
+      consumes:
+      - application/json
+      description: Create a new short link with an option for a custom slug or auto-generated
+        slug.
+      parameters:
+      - description: Create Link Payload
+        in: body
+        name: request
+        required: true
+        schema:
+          $ref: '#/definitions/dto.CreateLinkRequest'
+      produces:
+      - application/json
+      responses:
+        "201":
+          description: Created
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerToken: []
+      summary: Create a new link
+      tags:
+      - Links
   /users/profile:
     get:
       consumes:

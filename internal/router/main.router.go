@@ -14,4 +14,5 @@ func InitMainRouter(r *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
 
 	initAuthRouter(r, db)
 	initUserRouter(r, db, rdb)
+	initLinkRouter(r, db, rdb)
 }
