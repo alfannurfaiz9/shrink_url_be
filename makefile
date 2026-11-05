@@ -15,3 +15,13 @@ migrate-down:
 
 db-reset:
 	make migrate-down migrate-up
+
+up:
+	docker compose up -d --build
+
+down:
+	docker compose down --rmi local
+
+reset:
+	make down
+	make up
