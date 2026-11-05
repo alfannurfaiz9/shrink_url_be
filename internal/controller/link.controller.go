@@ -59,18 +59,26 @@ func (l *LinkController) CreateLink(ctx *gin.Context) {
 		return
 	}
 
-	userId, _ := ctx.Get("id")
+	userId, exist := ctx.Get("id")
+	if !exist {
+		ctx.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Success: false,
+			Code:    "UNAUTHORIZED",
+			Message: "unauthorized request",
+		})
+		return
+	}
 	userIdInt, ok := userId.(int)
 	if !ok {
 		ctx.JSON(http.StatusUnauthorized, dto.ErrorResponse{
 			Success: false,
 			Code:    "UNAUTHORIZED",
-			Message: "invalid payload format",
+			Message: "invalid user id type",
 		})
 		return
 	}
 
-	if err := l.ls.CreateLink(ctx, body, userIdInt); err != nil {
+	if err := l.ls.CreateLink(ctx.Request.Context(), body, userIdInt); err != nil {
 		log.Println(err.Error())
 
 		if errors.Is(err, app_error.InvalidURL) || errors.Is(err, app_error.InvalidSlug) {
