@@ -23,8 +23,8 @@ dc-down:
 	docker compose down --rmi local
 
 dc-reset:
-	make down
-	make up
+	make dc-down
+	make dc-up
 
 run:
 	swag init
