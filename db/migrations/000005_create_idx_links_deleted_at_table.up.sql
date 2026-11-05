@@ -1,0 +1,1 @@
+CREATE INDEX idx_links_slug_deleted_at ON links (slug, deleted_at);
