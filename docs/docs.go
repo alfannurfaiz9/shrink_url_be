@@ -279,7 +279,7 @@ const docTemplate = `{
             "get": {
                 "description": "Fetches the original URL based on the provided slug and redirects the client to it.",
                 "tags": [
-                    "Link"
+                    "Links"
                 ],
                 "summary": "Redirect to Original URL",
                 "parameters": [

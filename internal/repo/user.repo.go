@@ -23,6 +23,7 @@ func (u *UserRepo) GetUserProfile(ctx context.Context, id int) (model.UserProfil
 	FROM users
 	LEFT JOIN links ON links.user_id = users.id
 	WHERE users.id = $1
+	AND links.deleted_at IS NULL
 	GROUP BY users.id`
 
 	var user model.UserProfile

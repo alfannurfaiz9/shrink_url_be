@@ -267,7 +267,7 @@ paths:
             $ref: '#/definitions/dto.ErrorResponse'
       summary: Redirect to Original URL
       tags:
-      - Link
+      - Links
   /users/profile:
     get:
       consumes:
