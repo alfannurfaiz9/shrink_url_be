@@ -1,0 +1,1 @@
+CREATE INDEX idx_links_active ON links (user_id) WHERE deleted_at IS NULL;
