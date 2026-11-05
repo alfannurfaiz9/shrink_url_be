@@ -12,7 +12,7 @@ func GenerateSlug() string {
 	lenSlug := 6
 
 	for range lenSlug {
-		slug.WriteString(string(char[rand.Intn(lenSlug)]))
+		slug.WriteString(string(char[rand.Intn(len(char))]))
 	}
 
 	return slug.String()
