@@ -141,6 +141,31 @@ paths:
       tags:
       - Auth
   /links:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the list of links owned by the currently logged-in user
+        based on their JWT token
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerToken: []
+      summary: Get user links
+      tags:
+      - Links
     post:
       consumes:
       - application/json

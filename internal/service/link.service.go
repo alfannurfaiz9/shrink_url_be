@@ -54,3 +54,22 @@ func (l *LinkService) CreateLink(ctx context.Context, req dto.CreateLinkRequest,
 		Slug:        req.Slug,
 	})
 }
+
+func (l *LinkService) GetUserLink(ctx context.Context, userId int) ([]dto.Link, error) {
+	res, err := l.lr.GetUserLink(ctx, userId)
+	if err != nil {
+		return nil, err
+	}
+
+	links := make([]dto.Link, 0, len(res))
+	for _, v := range res {
+		links = append(links, dto.Link{
+			Id:          v.Id,
+			Slug:        v.Slug,
+			OriginalUrl: v.OriginalUrl,
+			CreatedAt:   v.CreatedAt,
+		})
+	}
+
+	return links, nil
+}

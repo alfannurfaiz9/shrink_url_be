@@ -17,6 +17,12 @@ type LinkController struct {
 	ls *service.LinkService
 }
 
+func NewLinkController(ls *service.LinkService) *LinkController {
+	return &LinkController{
+		ls: ls,
+	}
+}
+
 // CreateLink
 // @Summary      Create a new link
 // @Description  Create a new short link with an option for a custom slug or auto-generated slug.
@@ -30,12 +36,6 @@ type LinkController struct {
 // @Failure      400  {object}  dto.ErrorResponse
 // @Failure      401  {object}  dto.ErrorResponse
 // @Failure      500  {object}  dto.ErrorResponse
-func NewLinkController(ls *service.LinkService) *LinkController {
-	return &LinkController{
-		ls: ls,
-	}
-}
-
 func (l *LinkController) CreateLink(ctx *gin.Context) {
 	var body dto.CreateLinkRequest
 
@@ -108,5 +108,55 @@ func (l *LinkController) CreateLink(ctx *gin.Context) {
 	ctx.JSON(http.StatusCreated, dto.Response{
 		Success: true,
 		Message: "link created successfully",
+	})
+}
+
+// GetUserLink
+// @Summary      Get user links
+// @Description  Retrieves the list of links owned by the currently logged-in user based on their JWT token
+// @Tags         Links
+// @Accept       json
+// @Produce      json
+// @Security     BearerToken
+// @Router       /links [get]
+// @Success      200  {object}  dto.Response
+// @Failure      401  {object}  dto.ErrorResponse
+// @Failure      500  {object}  dto.ErrorResponse
+func (l *LinkController) GetUserLink(ctx *gin.Context) {
+	userId, exist := ctx.Get("id")
+	if !exist {
+		ctx.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Success: false,
+			Code:    "UNAUTHORIZED",
+			Message: "unauthorized request",
+		})
+		return
+	}
+
+	userIdInt, ok := userId.(int)
+	if !ok {
+		ctx.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Success: false,
+			Code:    "UNAUTHORIZED",
+			Message: "invalid user id type",
+		})
+		return
+	}
+
+	res, err := l.ls.GetUserLink(ctx.Request.Context(), userIdInt)
+	if err != nil {
+		log.Println(err)
+		ctx.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Code:    "INTERNAL_SERVER_ERROR",
+			Message: "internal server error",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, dto.Response{
+		Success: true,
+		Result:  res,
+		Message: "successfully get user links",
 	})
 }
