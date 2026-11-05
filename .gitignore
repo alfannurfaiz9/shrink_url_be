@@ -4,3 +4,4 @@ tmp
 redis.conf
 test
 docker-compose.yaml
+Dockerfile
