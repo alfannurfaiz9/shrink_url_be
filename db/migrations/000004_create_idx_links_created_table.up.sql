@@ -1,0 +1,1 @@
+CREATE INDEX idx_links_created ON links (user_id, created_at DESC);
