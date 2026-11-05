@@ -105,3 +105,21 @@ func (l *LinkRepo) GetOriginalUrl(ctx context.Context, slug string) (string, err
 
 	return originalUrl, nil
 }
+
+func (l *LinkRepo) DeleteSlug(ctx context.Context, urlId, userId int) error {
+	sql := `
+	UPDATE links
+	SET deleted_at = NOW()
+	WHERE id = $1
+	AND user_id = $2
+	AND deleted_at IS NULL`
+	cmd, err := l.db.Exec(ctx, sql, urlId, userId)
+	if err != nil {
+		return err
+	}
+	if cmd.RowsAffected() == 0 {
+		return app_error.LinkNotFound
+	}
+
+	return nil
+}

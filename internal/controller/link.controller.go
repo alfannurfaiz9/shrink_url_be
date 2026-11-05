@@ -4,6 +4,7 @@ import (
 	"errors"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/alfannurfaiz9/shrink_url_be/internal/dto"
 	app_error "github.com/alfannurfaiz9/shrink_url_be/internal/error"
@@ -164,12 +165,12 @@ func (l *LinkController) GetUserLink(ctx *gin.Context) {
 // GetOriginalUrl
 // @Summary      Redirect to Original URL
 // @Description  Fetches the original URL based on the provided slug and redirects the client to it.
-// @Tags         Link
+// @Tags         Links
 // @Param        slug   path      string  true  "Unique Link Slug"
 // @Router       /links/{slug}	[get]
 // @Success      302    {string}  string  "Successfully redirected to the original URL"
-// @Failure      404    {object}  dto.ErrorResponse  "Link not found"
-// @Failure      500    {object}  dto.ErrorResponse  "Internal server error"
+// @Failure      404    {object}  dto.ErrorResponse
+// @Failure      500    {object}  dto.ErrorResponse
 func (l *LinkController) GetOriginalUrl(ctx *gin.Context) {
 	slug := ctx.Param("slug")
 
@@ -193,4 +194,82 @@ func (l *LinkController) GetOriginalUrl(ctx *gin.Context) {
 	}
 
 	ctx.Redirect(http.StatusFound, res)
+}
+
+// DeleteSlug
+// @Summary      Delete a link (Soft Delete)
+// @Description  Soft deletes a specific short link by its ID, ensuring the link belongs to the authenticated user.
+// @Tags         Links
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "Link ID"
+// @Security     BearerToken
+// @Router       /links/{id} [delete]
+// @Success      200  {object}  dto.Response
+// @Failure      400  {object}  dto.ErrorResponse
+// @Failure      401  {object}  dto.ErrorResponse
+// @Failure      404  {object}  dto.ErrorResponse
+// @Failure      500  {object}  dto.ErrorResponse
+func (l *LinkController) DeleteSlug(ctx *gin.Context) {
+	userId, exist := ctx.Get("id")
+	if !exist {
+		ctx.JSON(http.StatusUnauthorized, dto.ErrorResponse{
+			Success: false,
+			Code:    "UNAUTHORIZED",
+			Message: "unauthorized request",
+		})
+		return
+	}
+	userIdInt, ok := userId.(int)
+	if !ok {
+		ctx.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Code:    "VALIDATION_ERROR",
+			Message: "invalid user id type",
+		})
+		return
+	}
+
+	urlId := ctx.Param("id")
+	urlIdInt, err := strconv.Atoi(urlId)
+	if err != nil {
+		ctx.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Code:    "VALIDATION_ERROR",
+			Message: "invalid url id type",
+		})
+		return
+	}
+
+	if err := l.ls.DeleteSlug(ctx.Request.Context(), urlIdInt, userIdInt); err != nil {
+		log.Println(err.Error())
+
+		if errors.Is(err, app_error.LinkNotFound) {
+			ctx.JSON(http.StatusNotFound, dto.ErrorResponse{
+				Success: false,
+				Code:    "SLUG_NOT_FOUND",
+				Message: err.Error(),
+			})
+			return
+		}
+		if errors.Is(err, app_error.InvalidSlugPayload) {
+			ctx.JSON(http.StatusBadRequest, dto.ErrorResponse{
+				Success: false,
+				Code:    "VALIDATION_ERROR",
+				Message: err.Error(),
+			})
+			return
+		}
+		ctx.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Code:    "INTERNAL_SERVER_ERROR",
+			Message: "internal server error",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, dto.Response{
+		Success: true,
+		Message: "slug deleted successfully",
+	})
 }

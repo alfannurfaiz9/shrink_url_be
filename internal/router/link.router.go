@@ -20,5 +20,7 @@ func initLinkRouter(router *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
 
 	r.POST("", lc.CreateLink)
 	r.GET("", lc.GetUserLink)
+	r.DELETE("/:id", lc.DeleteSlug)
+
 	router.GET("/:slug", lc.GetOriginalUrl)
 }

@@ -2,7 +2,6 @@ package service
 
 import (
 	"context"
-	"errors"
 	"net/url"
 	"regexp"
 
@@ -76,13 +75,13 @@ func (l *LinkService) GetUserLink(ctx context.Context, userId int) ([]dto.Link, 
 }
 
 func (l *LinkService) GetOriginalUrl(ctx context.Context, slug string) (string, error) {
-	res, err := l.lr.GetOriginalUrl(ctx, slug)
-	if err != nil {
-		if errors.Is(err, app_error.LinkNotFound) {
-			return "", app_error.LinkNotFound
-		}
-		return "", err
+	return l.lr.GetOriginalUrl(ctx, slug)
+}
+
+func (l *LinkService) DeleteSlug(ctx context.Context, urlId, userId int) error {
+	if urlId <= 0 || userId <= 0 {
+		return app_error.InvalidSlugPayload
 	}
 
-	return res, nil
+	return l.lr.DeleteSlug(ctx, urlId, userId)
 }
