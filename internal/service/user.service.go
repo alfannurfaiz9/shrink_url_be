@@ -30,9 +30,10 @@ func (u *UserService) GetUserProfile(ctx context.Context, id int) (dto.UserProfi
 	}
 
 	return dto.UserProfile{
-		Id:        result.Id,
-		Email:     result.Email,
-		FullName:  result.FullName,
-		CreatedAt: result.CreatedAt,
+		Id:         result.Id,
+		Email:      result.Email,
+		FullName:   result.FullName,
+		CreatedAt:  result.CreatedAt,
+		ActiveLink: result.ActiveLink,
 	}, nil
 }
