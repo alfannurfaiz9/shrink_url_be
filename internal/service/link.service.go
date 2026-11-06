@@ -157,5 +157,18 @@ func (l *LinkService) DeleteSlug(ctx context.Context, urlId, userId int) error {
 		return app_error.InvalidSlugPayload
 	}
 
-	return l.lr.DeleteSlug(ctx, urlId, userId)
+	if slug, err := l.lr.GetSlugById(ctx, urlId); err != nil {
+		log.Println("failed to delete cache, slug not found")
+	} else {
+		key := fmt.Sprintf("shrinkurl:%s", slug)
+		if err := utils.DelRedis(ctx, l.rdb, key); err != nil {
+			log.Printf("failed to delete %s cache %s", key, err)
+		}
+	}
+
+	if err := l.lr.DeleteSlug(ctx, urlId, userId); err != nil {
+		return err
+	}
+
+	return nil
 }

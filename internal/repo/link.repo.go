@@ -140,3 +140,18 @@ func (l *LinkRepo) DeleteSlug(ctx context.Context, urlId, userId int) error {
 
 	return nil
 }
+
+func (l *LinkRepo) GetSlugById(ctx context.Context, id int) (string, error) {
+	sql := `
+	SELECT slug
+	FROM links
+	WHERE id = $1
+	AND deleted_at IS NULL
+	`
+	var slug string
+	if err := l.db.QueryRow(ctx, sql, id).Scan(&slug); err != nil {
+		return "", err
+	}
+
+	return slug, nil
+}
