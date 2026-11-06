@@ -13,3 +13,9 @@ type Link struct {
 	OriginalUrl string    `json:"original_url"`
 	CreatedAt   time.Time `json:"created_at"`
 }
+
+type GetUserLinksRequest struct {
+	Search string `form:"search"`
+	Limit  int    `form:"limit"`
+	Page   int    `form:"page"`
+}
