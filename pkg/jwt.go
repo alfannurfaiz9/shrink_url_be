@@ -3,6 +3,7 @@ package pkg
 import (
 	"os"
 	"time"
+	"uuid"
 
 	app_error "github.com/alfannurfaiz9/shrink_url_be/internal/error"
 	"github.com/golang-jwt/jwt/v5"
@@ -15,6 +16,7 @@ type JWTClaims struct {
 
 func NewJWTClaims(id int) *JWTClaims {
 	return &JWTClaims{
+		ID:        uuid.New().String(),
 		Id:        id,
 		Issuer:    os.Getenv("JWT_ISSUER"),
 		ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Minute * 15)),
