@@ -15,7 +15,7 @@ func initLinkRouter(router *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
 	r.Use(middleware.AuthMiddleware(rdb))
 
 	lr := repo.NewLinksRepo(db)
-	ls := service.NewLinkService(lr)
+	ls := service.NewLinkService(lr, rdb)
 	lc := controller.NewLinkController(ls)
 
 	r.POST("", lc.CreateLink)

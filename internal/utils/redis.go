@@ -12,6 +12,15 @@ func GetRedisStr(ctx context.Context, rdb *redis.Client, key string) (string, er
 	return rdb.Get(ctx, key).Result()
 }
 
+func SetRedisStr(ctx context.Context, rdb *redis.Client, key string, data string, expiration ...time.Duration) error {
+	var ttl time.Duration
+	if len(expiration) > 0 {
+		ttl = expiration[0]
+	}
+
+	return rdb.Set(ctx, key, data, ttl).Err()
+}
+
 func GetRedisJson[T any](ctx context.Context, rdb *redis.Client, key string) (T, error) {
 	var data T
 	str, err := rdb.Get(ctx, key).Result()

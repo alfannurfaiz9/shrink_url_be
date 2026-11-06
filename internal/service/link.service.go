@@ -2,26 +2,32 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"log"
 	"math"
 	"net/url"
 	"regexp"
 	"strconv"
+	"time"
 
 	"github.com/alfannurfaiz9/shrink_url_be/internal/dto"
 	app_error "github.com/alfannurfaiz9/shrink_url_be/internal/error"
 	"github.com/alfannurfaiz9/shrink_url_be/internal/model"
 	"github.com/alfannurfaiz9/shrink_url_be/internal/repo"
 	"github.com/alfannurfaiz9/shrink_url_be/internal/utils"
+	"github.com/redis/go-redis/v9"
 )
 
 type LinkService struct {
-	lr *repo.LinkRepo
+	lr  *repo.LinkRepo
+	rdb *redis.Client
 }
 
-func NewLinkService(lr *repo.LinkRepo) *LinkService {
+func NewLinkService(lr *repo.LinkRepo, rdb *redis.Client) *LinkService {
 	return &LinkService{
-		lr: lr,
+		lr:  lr,
+		rdb: rdb,
 	}
 }
 
@@ -125,7 +131,25 @@ func (l *LinkService) GetUserLinks(ctx context.Context, userId int, endpoint str
 }
 
 func (l *LinkService) GetOriginalUrl(ctx context.Context, slug string) (string, error) {
-	return l.lr.GetOriginalUrl(ctx, slug)
+	key := fmt.Sprintf("shrinkurl:%s", slug)
+	if cache, err := utils.GetRedisStr(ctx, l.rdb, key); err != nil {
+		if !errors.Is(err, redis.Nil) {
+			log.Printf("failed to get %s cache %s", key, err)
+		}
+	} else {
+		return cache, nil
+	}
+
+	url, err := l.lr.GetOriginalUrl(ctx, slug)
+	if err != nil {
+		return "", err
+	}
+
+	if err := utils.SetRedisStr(ctx, l.rdb, key, url, 24*time.Hour); err != nil {
+		log.Printf("failed to set %s cache %s", key, err)
+	}
+
+	return url, nil
 }
 
 func (l *LinkService) DeleteSlug(ctx context.Context, urlId, userId int) error {
