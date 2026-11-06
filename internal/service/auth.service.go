@@ -3,7 +3,9 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
 	"strings"
+	"time"
 
 	"github.com/alfannurfaiz9/shrink_url_be/internal/dto"
 	app_error "github.com/alfannurfaiz9/shrink_url_be/internal/error"
@@ -12,15 +14,18 @@ import (
 	"github.com/alfannurfaiz9/shrink_url_be/internal/utils"
 	"github.com/alfannurfaiz9/shrink_url_be/pkg"
 	"github.com/jackc/pgx/v5"
+	"github.com/redis/go-redis/v9"
 )
 
 type AuthService struct {
-	ar *repo.AuthRepo
+	ar  *repo.AuthRepo
+	rdb *redis.Client
 }
 
-func NewAuthService(ar *repo.AuthRepo) *AuthService {
+func NewAuthService(ar *repo.AuthRepo, rdb *redis.Client) *AuthService {
 	return &AuthService{
-		ar: ar,
+		ar:  ar,
+		rdb: rdb,
 	}
 }
 
@@ -72,4 +77,15 @@ func (a *AuthService) Login(ctx context.Context, body dto.LoginRequest) (dto.Log
 	}
 
 	return dto.LoginResponse{Token: token}, nil
+}
+
+func (a *AuthService) Logout(ctx context.Context, jwtID string, expToken time.Time) error {
+	exp := time.Until(expToken)
+	key := fmt.Sprintf("shrinkurl:token:%s", jwtID)
+
+	if err := utils.SetRedisStr(ctx, a.rdb, key, "revoked", exp); err != nil {
+		return err
+	}
+
+	return nil
 }

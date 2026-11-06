@@ -56,8 +56,9 @@ func AuthMiddleware(rdb *redis.Client) gin.HandlerFunc {
 			return
 		}
 
-		key := fmt.Sprintf("shortlink:token:%s", result[1])
+		key := fmt.Sprintf("shrinkurl:token:%s", token.ID)
 		_, err = utils.GetRedisStr(ctx, rdb, key)
+		fmt.Println(key)
 		if err == nil {
 			ctx.AbortWithStatusJSON(http.StatusUnauthorized, dto.ErrorResponse{
 				Success: false,
@@ -68,6 +69,8 @@ func AuthMiddleware(rdb *redis.Client) gin.HandlerFunc {
 		}
 
 		ctx.Set("id", token.Id)
+		ctx.Set("ID", token.ID)
+		ctx.Set("exp", token.ExpiresAt.Time)
 		ctx.Next()
 	}
 }

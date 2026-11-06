@@ -12,7 +12,7 @@ import (
 func InitMainRouter(r *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
 	r.GET("/documentation/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
-	initAuthRouter(r, db)
+	initAuthRouter(r, db, rdb)
 	initUserRouter(r, db, rdb)
 	initLinkRouter(r, db, rdb)
 }
