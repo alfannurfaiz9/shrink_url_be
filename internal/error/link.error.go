@@ -8,4 +8,5 @@ var (
 	InvalidSlug        = errors.New("the slug can only contain letters, numbers, '-' and '_")
 	LinkNotFound       = errors.New("slug not found")
 	InvalidSlugPayload = errors.New("invalid delete slug payload")
+	LinkPageNotFound   = errors.New("link page not found")
 )

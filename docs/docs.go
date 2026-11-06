@@ -137,6 +137,26 @@ const docTemplate = `{
                     "Links"
                 ],
                 "summary": "Get user links",
+                "parameters": [
+                    {
+                        "type": "string",
+                        "description": "search",
+                        "name": "search",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "limit",
+                        "name": "limit",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "page",
+                        "name": "page",
+                        "in": "query"
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -146,6 +166,12 @@ const docTemplate = `{
                     },
                     "401": {
                         "description": "Unauthorized",
+                        "schema": {
+                            "$ref": "#/definitions/dto.ErrorResponse"
+                        }
+                    },
+                    "404": {
+                        "description": "Not Found",
                         "schema": {
                             "$ref": "#/definitions/dto.ErrorResponse"
                         }
@@ -417,6 +443,23 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.PaginationMeta": {
+            "type": "object",
+            "properties": {
+                "current_page": {
+                    "type": "integer"
+                },
+                "next": {
+                    "type": "string"
+                },
+                "prev": {
+                    "type": "string"
+                },
+                "total_page": {
+                    "type": "number"
+                }
+            }
+        },
         "dto.RegisterRequest": {
             "type": "object",
             "required": [
@@ -449,6 +492,9 @@ const docTemplate = `{
                 "message": {
                     "type": "string",
                     "example": "successfully get data"
+                },
+                "metadata": {
+                    "$ref": "#/definitions/dto.PaginationMeta"
                 },
                 "result": {},
                 "success": {

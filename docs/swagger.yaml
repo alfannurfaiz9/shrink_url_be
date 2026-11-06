@@ -35,6 +35,17 @@ definitions:
     - email
     - password
     type: object
+  dto.PaginationMeta:
+    properties:
+      current_page:
+        type: integer
+      next:
+        type: string
+      prev:
+        type: string
+      total_page:
+        type: number
+    type: object
   dto.RegisterRequest:
     properties:
       email:
@@ -60,6 +71,8 @@ definitions:
       message:
         example: successfully get data
         type: string
+      metadata:
+        $ref: '#/definitions/dto.PaginationMeta'
       result: {}
       success:
         example: true
@@ -146,6 +159,19 @@ paths:
       - application/json
       description: Retrieves the list of links owned by the currently logged-in user
         based on their JWT token
+      parameters:
+      - description: search
+        in: query
+        name: search
+        type: string
+      - description: limit
+        in: query
+        name: limit
+        type: integer
+      - description: page
+        in: query
+        name: page
+        type: integer
       produces:
       - application/json
       responses:
@@ -155,6 +181,10 @@ paths:
             $ref: '#/definitions/dto.Response'
         "401":
           description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
           schema:
             $ref: '#/definitions/dto.ErrorResponse'
         "500":

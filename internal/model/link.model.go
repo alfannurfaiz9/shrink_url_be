@@ -10,3 +10,10 @@ type Link struct {
 	CreatedAt   time.Time  `db:"created_at"`
 	DeletedAt   *time.Time `db:"deleted_at"`
 }
+
+type GetUserLinksParams struct {
+	UserId int    `db:"user_id"`
+	Search string `db:"search"`
+	Limit  int    `db:"limit"`
+	Offset int    `db:"offset"`
+}

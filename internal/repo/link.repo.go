@@ -52,17 +52,34 @@ func (l *LinkRepo) CreateLink(ctx context.Context, body model.Link) error {
 	return nil
 }
 
-func (l *LinkRepo) GetUserLink(ctx context.Context, userId int) ([]model.Link, error) {
+func (l *LinkRepo) GetAllUserLinks(ctx context.Context, userId int, search string) (int, error) {
+	sql := `
+	SELECT COUNT(slug)
+	FROM links
+	WHERE user_id = $1
+	AND slug LIKE '%' || $2 || '%'
+	`
+	var total int
+	if err := l.db.QueryRow(ctx, sql, userId, search).Scan(&total); err != nil {
+		return 0, err
+	}
+
+	return total, nil
+}
+
+func (l *LinkRepo) GetUserLinks(ctx context.Context, userId int, body model.GetUserLinksParams) ([]model.Link, error) {
 	sql := `
 	SELECT id, slug, original_url, created_at
 	FROM links
 	WHERE user_id = $1 AND deleted_at IS NULL
-	ORDER BY created_at DESC`
-	rows, err := l.db.Query(ctx, sql, userId)
+	AND slug LIKE '%' || $2 || '%'
+	ORDER BY created_at DESC
+	LIMIT $3 OFFSET $4`
+	args := []any{userId, body.Search, body.Limit, body.Offset}
+	rows, err := l.db.Query(ctx, sql, args...)
 	if err != nil {
 		return nil, err
 	}
-
 	defer rows.Close()
 
 	links := make([]model.Link, 0)

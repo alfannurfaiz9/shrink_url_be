@@ -2,8 +2,11 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"math"
 	"net/url"
 	"regexp"
+	"strconv"
 
 	"github.com/alfannurfaiz9/shrink_url_be/internal/dto"
 	app_error "github.com/alfannurfaiz9/shrink_url_be/internal/error"
@@ -55,10 +58,34 @@ func (l *LinkService) CreateLink(ctx context.Context, req dto.CreateLinkRequest,
 	})
 }
 
-func (l *LinkService) GetUserLink(ctx context.Context, userId int) ([]dto.Link, error) {
-	res, err := l.lr.GetUserLink(ctx, userId)
+func (l *LinkService) GetUserLinks(ctx context.Context, userId int, endpoint string, query dto.GetUserLinksRequest) ([]dto.Link, dto.PaginationMeta, error) {
+	if query.Limit <= 0 {
+		query.Limit = 6
+	}
+	if query.Page <= 0 {
+		query.Page = 1
+	}
+
+	res, err := l.lr.GetUserLinks(ctx, userId, model.GetUserLinksParams{
+		Search: query.Search,
+		Limit:  query.Limit,
+		Offset: (query.Page - 1) * query.Limit,
+	})
 	if err != nil {
-		return nil, err
+		return nil, dto.PaginationMeta{}, err
+	}
+
+	totalData, err := l.lr.GetAllUserLinks(ctx, userId, query.Search)
+	if err != nil {
+		return nil, dto.PaginationMeta{}, err
+	}
+
+	var totalPage float64
+	if totalData > 0 {
+		totalPage = math.Ceil(float64(totalData) / float64(query.Limit))
+		if query.Page > int(totalPage) {
+			return nil, dto.PaginationMeta{}, app_error.LinkPageNotFound
+		}
 	}
 
 	links := make([]dto.Link, 0, len(res))
@@ -71,7 +98,30 @@ func (l *LinkService) GetUserLink(ctx context.Context, userId int) ([]dto.Link, 
 		})
 	}
 
-	return links, nil
+	var next string
+	if query.Page < int(totalPage) {
+		q := url.Values{}
+		q.Set("limit", strconv.Itoa(query.Limit))
+		q.Set("page", strconv.Itoa(query.Page+1))
+		next = fmt.Sprintf("%s?%s", endpoint, q.Encode())
+	}
+
+	var prev string
+	if query.Page != 1 {
+		q := url.Values{}
+		q.Set("limit", strconv.Itoa(query.Limit))
+		q.Set("page", strconv.Itoa(query.Page-1))
+		prev = fmt.Sprintf("%s?%s", endpoint, q.Encode())
+	}
+
+	metadata := dto.PaginationMeta{
+		CurrentPage: query.Page,
+		TotalPage:   totalPage,
+		Prev:        prev,
+		Next:        next,
+	}
+
+	return links, metadata, nil
 }
 
 func (l *LinkService) GetOriginalUrl(ctx context.Context, slug string) (string, error) {

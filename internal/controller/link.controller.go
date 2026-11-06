@@ -112,18 +112,43 @@ func (l *LinkController) CreateLink(ctx *gin.Context) {
 	})
 }
 
-// GetUserLink
+// GetUserLinks
 // @Summary      Get user links
 // @Description  Retrieves the list of links owned by the currently logged-in user based on their JWT token
 // @Tags         Links
 // @Accept       json
 // @Produce      json
 // @Security     BearerToken
+// @Param        search	query	string	false  "search"
+// @Param        limit	query	int		false  "limit"
+// @Param        page	query	int		false  "page"
 // @Router       /links [get]
 // @Success      200  {object}  dto.Response
 // @Failure      401  {object}  dto.ErrorResponse
+// @Failure      404  {object}  dto.ErrorResponse
 // @Failure      500  {object}  dto.ErrorResponse
-func (l *LinkController) GetUserLink(ctx *gin.Context) {
+func (l *LinkController) GetUserLinks(ctx *gin.Context) {
+	var query dto.GetUserLinksRequest
+
+	if err := ctx.ShouldBindWith(&query, binding.Query); err != nil {
+		log.Println(err.Error())
+		errMsg := utils.ValidatorError(err)
+		if errMsg != "" {
+			ctx.JSON(http.StatusBadRequest, dto.ErrorResponse{
+				Success: false,
+				Code:    "VALIDATION_ERROR",
+				Message: errMsg,
+			})
+			return
+		}
+		ctx.JSON(http.StatusBadRequest, dto.ErrorResponse{
+			Success: false,
+			Code:    "INVALID_QUERY_PARAMS",
+			Message: "invalid query params",
+		})
+		return
+	}
+
 	userId, exist := ctx.Get("id")
 	if !exist {
 		ctx.JSON(http.StatusUnauthorized, dto.ErrorResponse{
@@ -144,9 +169,18 @@ func (l *LinkController) GetUserLink(ctx *gin.Context) {
 		return
 	}
 
-	res, err := l.ls.GetUserLink(ctx.Request.Context(), userIdInt)
+	res, meta, err := l.ls.GetUserLinks(ctx.Request.Context(), userIdInt, ctx.Request.URL.Path, query)
 	if err != nil {
 		log.Println(err)
+
+		if errors.Is(err, app_error.LinkPageNotFound) {
+			ctx.JSON(http.StatusNotFound, dto.ErrorResponse{
+				Success: false,
+				Code:    "PAGE_NOT_FOUND",
+				Message: "link page not found",
+			})
+			return
+		}
 		ctx.JSON(http.StatusInternalServerError, dto.ErrorResponse{
 			Success: false,
 			Code:    "INTERNAL_SERVER_ERROR",
@@ -155,11 +189,17 @@ func (l *LinkController) GetUserLink(ctx *gin.Context) {
 		return
 	}
 
-	ctx.JSON(http.StatusOK, dto.Response{
+	data := dto.Response{
 		Success: true,
 		Result:  res,
 		Message: "successfully get user links",
-	})
+	}
+
+	if len(res) > 0 {
+		data.Metadata = meta
+	}
+
+	ctx.JSON(http.StatusOK, data)
 }
 
 // GetOriginalUrl
