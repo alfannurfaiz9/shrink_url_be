@@ -28,10 +28,12 @@ func NewUserService(ur *repo.UserRepo, rdb *redis.Client) *UserService {
 }
 
 func (u *UserService) GetUserProfile(ctx context.Context, id int) (dto.UserProfile, error) {
-	key := fmt.Sprintf("shrinkurl:%v", id)
+	key := fmt.Sprintf("shrinkurl:user:profile:%v", id)
 	cache, err := utils.GetRedisJson[dto.UserProfile](ctx, u.rdb, key)
 	if err != nil {
-		log.Printf("failed to get %s cache %s", key, err)
+		if !errors.Is(err, redis.Nil) {
+			log.Printf("failed to get %s cache %s", key, err)
+		}
 	}
 	if err == nil {
 		return cache, nil
@@ -45,7 +47,9 @@ func (u *UserService) GetUserProfile(ctx context.Context, id int) (dto.UserProfi
 		return dto.UserProfile{}, err
 	}
 
-	utils.SetRedisJson(ctx, u.rdb, key, result, 24*time.Hour)
+	if err := utils.SetRedisJson(ctx, u.rdb, key, result, 24*time.Hour); err != nil {
+		log.Printf("failed to set %s cache %s", key, err)
+	}
 
 	return dto.UserProfile{
 		Id:         result.Id,
