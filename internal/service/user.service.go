@@ -3,24 +3,40 @@ package service
 import (
 	"context"
 	"errors"
+	"fmt"
+	"log"
+	"time"
 
 	"github.com/alfannurfaiz9/shrink_url_be/internal/dto"
 	app_error "github.com/alfannurfaiz9/shrink_url_be/internal/error"
 	"github.com/alfannurfaiz9/shrink_url_be/internal/repo"
+	"github.com/alfannurfaiz9/shrink_url_be/internal/utils"
 	"github.com/jackc/pgx/v5"
+	"github.com/redis/go-redis/v9"
 )
 
 type UserService struct {
-	ur *repo.UserRepo
+	ur  *repo.UserRepo
+	rdb *redis.Client
 }
 
-func NewUserService(ur *repo.UserRepo) *UserService {
+func NewUserService(ur *repo.UserRepo, rdb *redis.Client) *UserService {
 	return &UserService{
-		ur: ur,
+		ur:  ur,
+		rdb: rdb,
 	}
 }
 
 func (u *UserService) GetUserProfile(ctx context.Context, id int) (dto.UserProfile, error) {
+	key := fmt.Sprintf("shrinkurl:%v", id)
+	cache, err := utils.GetRedisJson[dto.UserProfile](ctx, u.rdb, key)
+	if err != nil {
+		log.Printf("failed to get %s cache %s", key, err)
+	}
+	if err == nil {
+		return cache, nil
+	}
+
 	result, err := u.ur.GetUserProfile(ctx, id)
 	if err != nil {
 		if errors.Is(err, pgx.ErrNoRows) {
@@ -28,6 +44,8 @@ func (u *UserService) GetUserProfile(ctx context.Context, id int) (dto.UserProfi
 		}
 		return dto.UserProfile{}, err
 	}
+
+	utils.SetRedisJson(ctx, u.rdb, key, result, 24*time.Hour)
 
 	return dto.UserProfile{
 		Id:         result.Id,

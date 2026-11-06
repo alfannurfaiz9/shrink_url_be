@@ -15,7 +15,7 @@ func initUserRouter(router *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
 	r.Use(middleware.AuthMiddleware(rdb))
 
 	ur := repo.NewUserRepo(db)
-	us := service.NewUserService(ur)
+	us := service.NewUserService(ur, rdb)
 	uc := controller.NewUserController(us)
 
 	r.GET("profile", uc.GetUserProfile)
