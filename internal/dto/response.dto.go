@@ -14,8 +14,8 @@ type ErrorResponse struct {
 }
 
 type PaginationMeta struct {
-	CurrentPage int     `json:"current_page"`
-	TotalPage   float64 `json:"total_page"`
-	Next        string  `json:"next"`
-	Prev        string  `json:"prev"`
+	CurrentPage int     `json:"current_page" example:"2"`
+	TotalPage   float64 `json:"total_page" example:"30"`
+	Next        string  `json:"next" example:"shortlink.io/1"`
+	Prev        string  `json:"prev" example:"shortlink.io/3"`
 }

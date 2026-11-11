@@ -493,16 +493,20 @@ const docTemplate = `{
             "type": "object",
             "properties": {
                 "current_page": {
-                    "type": "integer"
+                    "type": "integer",
+                    "example": 2
                 },
                 "next": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "shortlink.io/1"
                 },
                 "prev": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "shortlink.io/3"
                 },
                 "total_page": {
-                    "type": "number"
+                    "type": "number",
+                    "example": 30
                 }
             }
         },

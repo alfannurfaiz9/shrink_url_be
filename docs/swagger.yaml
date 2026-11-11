@@ -38,12 +38,16 @@ definitions:
   dto.PaginationMeta:
     properties:
       current_page:
+        example: 2
         type: integer
       next:
+        example: shortlink.io/1
         type: string
       prev:
+        example: shortlink.io/3
         type: string
       total_page:
+        example: 30
         type: number
     type: object
   dto.RegisterRequest:
