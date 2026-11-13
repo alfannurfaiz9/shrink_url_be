@@ -42,13 +42,13 @@ func (u *UserService) GetUserInfo(ctx context.Context, id int) (dto.UserInfo, er
 		return dto.UserInfo{}, err
 	}
 
-	if err := utils.SetRedisJson(ctx, u.rdb, key, result, 24*time.Hour); err != nil {
-		log.Printf("failed to set %s cache %s", key, err)
-	}
-
 	userInfo := dto.UserInfo{
 		FullName: result.FullName,
 		Email:    result.Email,
+	}
+
+	if err := utils.SetRedisJson(ctx, u.rdb, key, userInfo, 24*time.Hour); err != nil {
+		log.Printf("failed to set %s cache %s", key, err)
 	}
 
 	return userInfo, nil
