@@ -74,15 +74,17 @@ func (u *UserService) GetUserProfile(ctx context.Context, id int) (dto.UserProfi
 		return dto.UserProfile{}, err
 	}
 
-	if err := utils.SetRedisJson(ctx, u.rdb, key, result, 24*time.Hour); err != nil {
-		log.Printf("failed to set %s cache %s", key, err)
-	}
-
-	return dto.UserProfile{
+	userProfile := dto.UserProfile{
 		Id:         result.Id,
 		Email:      result.Email,
 		FullName:   result.FullName,
 		CreatedAt:  result.CreatedAt,
 		ActiveLink: result.ActiveLink,
-	}, nil
+	}
+
+	if err := utils.SetRedisJson(ctx, u.rdb, key, userProfile, 24*time.Hour); err != nil {
+		log.Printf("failed to set %s cache %s", key, err)
+	}
+
+	return userProfile, nil
 }
