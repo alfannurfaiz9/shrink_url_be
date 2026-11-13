@@ -19,4 +19,5 @@ func initUserRouter(router *gin.Engine, db *pgxpool.Pool, rdb *redis.Client) {
 	uc := controller.NewUserController(us)
 
 	r.GET("profile", uc.GetUserProfile)
+	r.GET("info", uc.GetUserInfo)
 }

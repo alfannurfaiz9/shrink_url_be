@@ -331,6 +331,39 @@ paths:
       summary: Redirect to Original URL
       tags:
       - Links
+  /users/info:
+    get:
+      consumes:
+      - application/json
+      description: Retrieves the user information
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "404":
+          description: Not Found
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerToken: []
+      summary: Get User Info
+      tags:
+      - User
   /users/profile:
     get:
       consumes:

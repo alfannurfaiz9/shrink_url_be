@@ -17,6 +17,23 @@ func NewUserRepo(db *pgxpool.Pool) *UserRepo {
 	}
 }
 
+func (u *UserRepo) GetUserInfo(ctx context.Context, id int) (model.User, error) {
+	sql := `
+	SELECT full_name, email
+	FROM users
+	WHERE id = $1
+	`
+	var userInfo model.User
+	if err := u.db.QueryRow(ctx, sql, id).Scan(
+		&userInfo.FullName,
+		&userInfo.Email,
+	); err != nil {
+		return model.User{}, err
+	}
+
+	return userInfo, nil
+}
+
 func (u *UserRepo) GetUserProfile(ctx context.Context, id int) (model.UserProfile, error) {
 	sql := `
 	SELECT users.id, users.email, users.full_name, users.created_at, COUNT(links.slug)
