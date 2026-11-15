@@ -9,6 +9,7 @@ import (
 	"net/url"
 	"regexp"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/alfannurfaiz9/shrink_url_be/internal/dto"
@@ -41,6 +42,14 @@ func (l *LinkService) CheckExistingLinks(ctx context.Context, slug string) (bool
 		return false, app_error.InvalidSlug
 	}
 
+	reservedWords := []string{"api", "login", "register", "dashboard"}
+	lowerSlug := strings.ToLower(slug)
+	for _, word := range reservedWords {
+		if strings.Contains(lowerSlug, strings.ToLower(word)) {
+			return false, app_error.InvalidSlug
+		}
+	}
+
 	exist, err := l.lr.CheckExistingLinks(ctx, slug)
 	if err != nil {
 		return false, err
@@ -57,11 +66,20 @@ func (l *LinkService) CreateLink(ctx context.Context, req dto.CreateLinkRequest,
 
 	isCustomSlug := req.Slug != ""
 	slugRegex := regexp.MustCompile(`^[a-zA-Z0-9-_]+$`)
+	reservedWords := []string{"api", "login", "register", "dashboard"}
+	lowerSlug := strings.ToLower(req.Slug)
+
 	if !isCustomSlug {
 		req.Slug = utils.GenerateSlug()
 	} else {
 		if !slugRegex.MatchString(req.Slug) {
 			return app_error.InvalidSlug
+		}
+
+		for _, word := range reservedWords {
+			if strings.Contains(lowerSlug, strings.ToLower(word)) {
+				return app_error.InvalidSlug
+			}
 		}
 	}
 
