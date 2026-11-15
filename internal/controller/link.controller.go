@@ -24,6 +24,66 @@ func NewLinkController(ls *service.LinkService) *LinkController {
 	}
 }
 
+// CheckExistingLinks
+// @Summary Check if a custom slug is available or already exists
+// @Description Validates the slug format using regex and checks its existence in the database.
+// @Tags Links
+// @Accept json
+// @Produce json
+// @Param slug query string true "Custom slug to check"
+// @Security     BearerToken
+// @Router /links/check [get]
+// @Success 200 {object} dto.Response
+// @Failure 400 {object} dto.ErrorResponse
+// @Failure 401 {object} dto.ErrorResponse
+// @Failure 500 {object} dto.ErrorResponse
+func (l *LinkController) CheckExistingLinks(ctx *gin.Context) {
+	slug := ctx.Query("slug")
+
+	exist, err := l.ls.CheckExistingLinks(ctx.Request.Context(), slug)
+	if err != nil {
+		log.Println(err.Error())
+
+		if errors.Is(err, app_error.LinkNotFound) {
+			ctx.JSON(http.StatusBadRequest, dto.ErrorResponse{
+				Success: false,
+				Code:    "VALIDATION_ERROR",
+				Message: err.Error(),
+			})
+			return
+		}
+
+		if errors.Is(err, app_error.InvalidSlug) {
+			ctx.JSON(http.StatusBadRequest, dto.ErrorResponse{
+				Success: false,
+				Code:    "VALIDATION_ERROR",
+				Message: err.Error(),
+			})
+			return
+		}
+
+		ctx.JSON(http.StatusInternalServerError, dto.ErrorResponse{
+			Success: false,
+			Code:    "INTERNAL_SERVER_ERROR",
+			Message: "internal server error",
+		})
+		return
+	}
+
+	if exist {
+		ctx.JSON(http.StatusConflict, dto.ErrorResponse{
+			Success: false,
+			Message: "slug already exist",
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusOK, dto.Response{
+		Success: true,
+		Message: "slug ready to use",
+	})
+}
+
 // CreateLink
 // @Summary      Create a new link
 // @Description  Create a new short link with an option for a custom slug or auto-generated slug.

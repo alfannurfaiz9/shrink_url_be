@@ -31,6 +31,24 @@ func NewLinkService(lr *repo.LinkRepo, rdb *redis.Client) *LinkService {
 	}
 }
 
+func (l *LinkService) CheckExistingLinks(ctx context.Context, slug string) (bool, error) {
+	if slug == "" {
+		return false, app_error.LinkNotFound
+	}
+
+	slugRegex := regexp.MustCompile(`^[a-zA-Z0-9-_]+$`)
+	if !slugRegex.MatchString(slug) {
+		return false, app_error.InvalidSlug
+	}
+
+	exist, err := l.lr.CheckExistingLinks(ctx, slug)
+	if err != nil {
+		return false, err
+	}
+
+	return exist, nil
+}
+
 func (l *LinkService) CreateLink(ctx context.Context, req dto.CreateLinkRequest, userId int) error {
 	parsedURL, err := url.ParseRequestURI(req.OriginalUrl)
 	if err != nil || (parsedURL.Scheme != "http" && parsedURL.Scheme != "https") {

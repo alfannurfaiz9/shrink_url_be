@@ -331,6 +331,42 @@ paths:
       summary: Redirect to Original URL
       tags:
       - Links
+  /links/check:
+    get:
+      consumes:
+      - application/json
+      description: Validates the slug format using regex and checks its existence
+        in the database.
+      parameters:
+      - description: Custom slug to check
+        in: query
+        name: slug
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Response'
+        "400":
+          description: Bad Request
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "401":
+          description: Unauthorized
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+        "500":
+          description: Internal Server Error
+          schema:
+            $ref: '#/definitions/dto.ErrorResponse'
+      security:
+      - BearerToken: []
+      summary: Check if a custom slug is available or already exists
+      tags:
+      - Links
   /users/info:
     get:
       consumes:
