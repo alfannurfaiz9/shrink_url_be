@@ -25,7 +25,8 @@ import (
 // @description					Bearer Token used as identity for accessing backend
 func main() {
 	if err := godotenv.Load(); err != nil {
-		log.Fatal(err.Error())
+		log.Println(err.Error())
+		// log.Fatal(err.Error())
 		// return
 	}
 
