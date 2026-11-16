@@ -159,6 +159,7 @@ func (l *LinkService) GetUserLinks(ctx context.Context, userId int, endpoint str
 	metadata := dto.PaginationMeta{
 		CurrentPage: query.Page,
 		TotalPage:   totalPage,
+		TotalData:   totalData,
 		Prev:        prev,
 		Next:        next,
 	}

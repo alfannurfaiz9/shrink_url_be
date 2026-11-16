@@ -46,6 +46,8 @@ definitions:
       prev:
         example: shortlink.io/3
         type: string
+      total_data:
+        type: integer
       total_page:
         example: 30
         type: number

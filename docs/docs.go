@@ -611,6 +611,9 @@ const docTemplate = `{
                     "type": "string",
                     "example": "shortlink.io/3"
                 },
+                "total_data": {
+                    "type": "integer"
+                },
                 "total_page": {
                     "type": "number",
                     "example": 30
