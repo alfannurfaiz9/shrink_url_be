@@ -57,8 +57,8 @@ func (l *LinkRepo) GetAllUserLinks(ctx context.Context, userId int, search strin
 	SELECT COUNT(slug)
 	FROM links
 	WHERE user_id = $1
-	AND slug LIKE '%' || $2 || '%
-	AND deleted_at IS NULL'
+	AND slug LIKE '%' || $2 || '%'
+	AND deleted_at IS NULL
 	`
 	var total int
 	if err := l.db.QueryRow(ctx, sql, userId, search).Scan(&total); err != nil {
