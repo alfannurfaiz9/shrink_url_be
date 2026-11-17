@@ -93,6 +93,11 @@ func (l *LinkService) CreateLink(ctx context.Context, req dto.CreateLinkRequest,
 		}
 	}
 
+	key := fmt.Sprintf("shrinkurl:user:profile:%v", userId)
+	if err := utils.DelRedis(ctx, l.rdb, key); err != nil {
+		log.Printf("failed to delete cache %s", key)
+	}
+
 	return l.lr.CreateLink(ctx, model.Link{
 		UserId:      userId,
 		OriginalUrl: req.OriginalUrl,
@@ -205,6 +210,11 @@ func (l *LinkService) DeleteSlug(ctx context.Context, urlId, userId int) error {
 
 	if err := l.lr.DeleteSlug(ctx, urlId, userId); err != nil {
 		return err
+	}
+
+	key := fmt.Sprintf("shrinkurl:user:profile:%v", userId)
+	if err := utils.DelRedis(ctx, l.rdb, key); err != nil {
+		log.Printf("failed to delete cache %s", key)
 	}
 
 	return nil
