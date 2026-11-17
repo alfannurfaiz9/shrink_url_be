@@ -84,7 +84,6 @@ definitions:
         example: true
         type: boolean
     type: object
-host: localhost:9000
 info:
   contact: {}
   description: API docs for ShrinkURL
@@ -435,6 +434,9 @@ paths:
       summary: Get User Profile
       tags:
       - User
+schemes:
+- https
+- http
 securityDefinitions:
   BearerToken:
     description: Bearer Token used as identity for accessing backend

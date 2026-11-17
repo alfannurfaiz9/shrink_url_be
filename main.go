@@ -17,8 +17,8 @@ import (
 // @title           			ShrinkURL Backend
 // @version         			1.0
 // @description     			API docs for ShrinkURL
-// @host      					localhost:9000
 // @BasePath  					/
+// @schemes                     https http
 // @securityDefinitions.apikey	BearerToken
 // @in							header
 // @name						Authorization
