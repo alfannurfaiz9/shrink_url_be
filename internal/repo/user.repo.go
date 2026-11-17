@@ -38,10 +38,9 @@ func (u *UserRepo) GetUserProfile(ctx context.Context, id int) (model.UserProfil
 	sql := `
 	SELECT users.id, users.email, users.full_name, users.created_at, COUNT(links.slug)
 	FROM users
-	LEFT JOIN links ON links.user_id = users.id
+	LEFT JOIN links ON links.user_id = users.id AND links.deleted_at IS NULL
 	WHERE users.id = $1
-	AND links.deleted_at IS NULL
-	GROUP BY users.id`
+	GROUP BY users.id, users.email, users.full_name, users.created_at`
 
 	var user model.UserProfile
 	if err := u.db.QueryRow(ctx, sql, id).Scan(
